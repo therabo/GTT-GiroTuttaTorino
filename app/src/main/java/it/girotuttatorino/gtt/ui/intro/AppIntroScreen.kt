@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
@@ -30,6 +31,7 @@ import it.girotuttatorino.gtt.R
 private const val INTRO_TARGET_DURATION_MILLIS = 3_000
 private const val INTRO_FADE_IN_MILLIS = 180
 private const val INTRO_FADE_OUT_MILLIS = 220
+private const val INTRO_VIDEO_SCALE_FACTOR = 0.8f
 
 @Composable
 fun AppIntroScreen(
@@ -108,7 +110,9 @@ fun AppIntroScreen(
     ) {
         AndroidView(
             factory = { videoView },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .scale(INTRO_VIDEO_SCALE_FACTOR),
         )
         Box(
             modifier = Modifier
