@@ -20,9 +20,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.viewinterop.AndroidView
 import it.girotuttatorino.gtt.R
 
@@ -36,10 +36,11 @@ fun AppIntroScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val backgroundColor = colorResource(R.color.intro_background)
     val currentOnFinished = rememberUpdatedState(onFinished)
     var firstFrameRendered by remember { mutableStateOf(false) }
     var playbackCompleted by remember { mutableStateOf(false) }
-    val whiteOverlayAlpha = remember { Animatable(1f) }
+    val introOverlayAlpha = remember { Animatable(1f) }
     val videoUri = remember(context) {
         Uri.parse(
             "${ContentResolver.SCHEME_ANDROID_RESOURCE}://" +
@@ -52,6 +53,7 @@ fun AppIntroScreen(
             setVideoURI(videoUri)
             setOnPreparedListener { player ->
                 player.isLooping = false
+                player.setVolume(0f, 0f)
                 val sourceDurationMillis = player.duration.coerceAtLeast(1)
                 val playbackSpeed = sourceDurationMillis.toFloat() / INTRO_TARGET_DURATION_MILLIS
                 player.playbackParams = player.playbackParams
@@ -75,7 +77,7 @@ fun AppIntroScreen(
 
     LaunchedEffect(firstFrameRendered) {
         if (firstFrameRendered) {
-            whiteOverlayAlpha.animateTo(
+            introOverlayAlpha.animateTo(
                 targetValue = 0f,
                 animationSpec = tween(INTRO_FADE_IN_MILLIS),
             )
@@ -84,7 +86,7 @@ fun AppIntroScreen(
 
     LaunchedEffect(playbackCompleted) {
         if (playbackCompleted) {
-            whiteOverlayAlpha.animateTo(
+            introOverlayAlpha.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(INTRO_FADE_OUT_MILLIS),
             )
@@ -99,7 +101,7 @@ fun AppIntroScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(backgroundColor)
             .testTag("app_intro"),
     ) {
         AndroidView(
@@ -109,8 +111,8 @@ fun AppIntroScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .alpha(whiteOverlayAlpha.value)
-                .background(Color.White),
+                .alpha(introOverlayAlpha.value)
+                .background(backgroundColor),
         )
     }
 }
