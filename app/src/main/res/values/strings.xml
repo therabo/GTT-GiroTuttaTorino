@@ -1,4 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">GTT - Giro Tutta Torino</string>
+    <string name="tickets_title">GiroTuttaTorino</string>
+    <string name="all_tickets">Tutti i biglietti</string>
+    <string name="ticket_types_summary_one" tools:ignore="PluralsCandidate">%1$d tipologie · %2$d disponibile</string>
+    <string name="ticket_types_summary_many" tools:ignore="PluralsCandidate">%1$d tipologie · %2$d disponibili</string>
+    <string name="ticket_available">Disponibile</string>
+    <string name="ticket_validated">Validato</string>
+    <string name="ticket_name">City su APP</string>
+    <string name="ticket_duration">100 minuti</string>
+    <string name="ticket_duration_multi_daily_7">7 Daily in giornate a scelta</string>
+    <string name="ticket_duration_daily">Fino al termine del servizio</string>
+    <string name="ticket_duration_extraurban">90 minuti per viaggio</string>
+    <string name="ticket_duration_tour_48">48 ore dalla convalida</string>
+    <string name="ticket_duration_tour_72">72 ore dalla convalida</string>
+    <string name="ticket_countdown" tools:ignore="PluralsCandidate">%1$d:%2$02d rimanenti</string>
+    <string name="hold_for_ticket_details">Tieni premuto per vedere i dettagli</string>
+    <string name="tap_outside_to_close_ticket">Tocca fuori dal biglietto per chiudere</string>
+    <string name="close_ticket_details">Chiudi i dettagli del biglietto</string>
+    <string name="reset_validated_ticket">Ripristina biglietto</string>
+    <string name="regenerate_ticket">RIGENERA</string>
+    <string name="reset_ticket_title">Ripristinare il biglietto?</string>
+    <string name="reset_ticket_message">La convalida in corso verrà eliminata e il biglietto tornerà disponibile.</string>
+    <string name="reset_ticket_confirm">Ripristina</string>
+    <string name="reset_ticket_cancel">Annulla</string>
+    <string name="ticket_validity_label">Validità</string>
+    <string name="ticket_area_label">Area</string>
+    <string name="ticket_area_value">Rete urbana e suburbana GTT</string>
+    <string name="ticket_area_extraurban">Linee extraurbane GTT · validità zonale</string>
+    <string name="ticket_area_tour">Tram, bus e metropolitana</string>
+    <string name="ticket_trips_label">Viaggi</string>
+    <string name="ticket_trips_value">1 corsa · 1 accesso metro</string>
+    <string name="ticket_trips_multi_daily_7">7 biglietti Daily · metro illimitata</string>
+    <string name="ticket_trips_daily">Viaggi e accessi metro illimitati</string>
+    <string name="ticket_trips_extraurban_multi_6">6 viaggi sulle linee extraurbane</string>
+    <string name="ticket_trips_extraurban_1">1 viaggio sulle linee extraurbane</string>
+    <string name="ticket_trips_daily_x4">Fino a 4 persone · metro illimitata</string>
+    <string name="ticket_trips_tour">Viaggi illimitati su tram, bus e metro</string>
+    <string name="ticket_rides_remaining_value">Viaggi residui nel titolo: %1$d</string>
+    <string name="ticket_metro_access_label">Accesso metro</string>
+    <string name="ticket_metro_access_value">%1$d</string>
+    <string name="currently_unavailable">Attualmente non disponibile</string>
+    <string name="ticket_multi_daily_7">Multi Daily 7</string>
+    <string name="ticket_daily">Daily</string>
+    <string name="ticket_extraurban_multi_6">Multicorsa extraurbano 6</string>
+    <string name="ticket_extraurban_1">Extraurbano 1</string>
+    <string name="ticket_daily_x4">Daily x4</string>
+    <string name="ticket_tour_48">Tour 48 ore</string>
+    <string name="ticket_tour_72">Tour 72 ore</string>
+    <string name="nfc_service_name">Validazione biglietto NFC</string>
+    <string name="nfc_service_description">Biglietto GTT per la validazione NFC</string>
+    <string name="nfc_aid_group_description">GTT NFC Ticket</string>
+    <string name="nfc_ready_title">NFC pronto</string>
+    <string name="nfc_ready_message">Avvicina il telefono alla validatrice per validare il biglietto.</string>
+    <string name="nfc_validated_title">Biglietto validato</string>
+    <string name="nfc_validated_message">Validazione completata alle %1$s.</string>
+    <string name="nfc_disabled_title">NFC disattivato</string>
+    <string name="nfc_disabled_message">Attiva NFC dalle impostazioni del dispositivo per continuare.</string>
+    <string name="nfc_unsupported_title">NFC non disponibile</string>
+    <string name="nfc_unsupported_message">Questo dispositivo non supporta la validazione NFC/HCE.</string>
+    <string name="nfc_error_title">NFC non pronto</string>
+    <string name="nfc_error_message" tools:ignore="Typos">Non è stato possibile preparare il biglietto per la validazione.</string>
 </resources>

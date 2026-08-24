@@ -1,5 +1,6 @@
 # Gradle
 .gradle/
+.kotlin/
 **/build/
 
 # Local Android SDK configuration
@@ -16,3 +17,10 @@ captures/
 
 # Operating system files
 .DS_Store
+
+# Private ticket material and local device provisioning
+*.vtoken
+artifacts/
+test-fixtures/
+PRIVATE_TICKET_PROVISIONING.md
+tools/provision-private-ticket.sh

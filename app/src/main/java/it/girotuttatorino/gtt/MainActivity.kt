@@ -2,45 +2,43 @@ package it.girotuttatorino.gtt
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.core.view.WindowCompat
+import it.girotuttatorino.gtt.ui.intro.AppIntroScreen
+import it.girotuttatorino.gtt.ui.tickets.TicketsScreen
 import it.girotuttatorino.gtt.ui.theme.GTTTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+        )
         setContent {
-            GTTApp()
-        }
-    }
-}
+            var showIntro by rememberSaveable { mutableStateOf(true) }
 
-@Composable
-private fun GTTApp() {
-    GTTTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background,
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(text = "GTT - Giro Tutta Torino")
+            SideEffect {
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = showIntro
+                    isAppearanceLightNavigationBars = showIntro
+                }
+            }
+
+            GTTTheme(darkTheme = false) {
+                if (showIntro) {
+                    AppIntroScreen(onFinished = { showIntro = false })
+                } else {
+                    TicketsScreen()
+                }
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun GTTAppPreview() {
-    GTTApp()
 }
