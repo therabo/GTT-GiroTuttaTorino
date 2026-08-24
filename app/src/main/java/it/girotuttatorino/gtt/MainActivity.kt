@@ -8,7 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import it.girotuttatorino.gtt.ui.intro.AppIntroScreen
@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
         setContent {
-            var showIntro by rememberSaveable { mutableStateOf(true) }
+            var showIntro by remember { mutableStateOf(true) }
 
             SideEffect {
                 WindowCompat.getInsetsController(window, window.decorView).apply {
