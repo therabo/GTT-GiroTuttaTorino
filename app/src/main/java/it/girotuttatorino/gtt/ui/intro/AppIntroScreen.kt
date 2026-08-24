@@ -1,6 +1,7 @@
 package it.girotuttatorino.gtt.ui.intro
 
 import android.content.ContentResolver
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.view.View
@@ -50,6 +51,7 @@ fun AppIntroScreen(
     val videoView = remember(context, videoUri) {
         VideoView(context).apply {
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE)
             setVideoURI(videoUri)
             setOnPreparedListener { player ->
                 player.isLooping = false
