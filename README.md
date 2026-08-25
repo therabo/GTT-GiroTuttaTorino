@@ -17,32 +17,13 @@ The project focuses on accurately reproducing the communication between the mobi
 
 ## Application preview
 
-<table align="center" width="100%">
-  <tr>
-    <td align="center" width="50%">
-      <img
-        src="docs/images/ticket-catalog.jpg"
-        alt="GTT ticket catalog with a City ticket available"
-        width="300"
-      />
-      <br />
-      <strong>Ticket catalog</strong>
-      <br />
-      <sub>Available and unavailable fare products</sub>
-    </td>
-    <td align="center" width="50%">
-      <img
-        src="docs/images/nfc-ticket-ready.jpg"
-        alt="City ticket open and ready for NFC presentation"
-        width="297"
-      />
-      <br />
-      <strong>NFC-ready ticket</strong>
-      <br />
-      <sub>Expanded ticket ready for validator presentation</sub>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img
+    src="docs/images/application-preview.svg"
+    alt="GTT ticket catalog and NFC-ready ticket previews"
+    width="646"
+  />
+</p>
 
 ## How it works
 

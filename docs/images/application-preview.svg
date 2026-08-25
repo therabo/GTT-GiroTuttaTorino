@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="646" height="690" viewBox="0 0 646 690" role="img" aria-labelledby="title description">
+  <title id="title">GTT application preview</title>
+  <desc id="description">Ticket catalog and NFC-ready ticket screens with their captions.</desc>
+
+  <style>
+    .preview-title {
+      fill: #24292f;
+      font: 600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .preview-description {
+      fill: #57606a;
+      font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .preview-title {
+        fill: #f0f6fc;
+      }
+
+      .preview-description {
+        fill: #8c959f;
+      }
+    }
+  </style>
+
+  <image href="ticket-catalog.jpg" x="0" y="0" width="300" height="621.762" />
+  <image href="nfc-ticket-ready.jpg" x="347.5" y="1.396" width="297" height="620.366" />
+
+  <text class="preview-title" x="150" y="650" text-anchor="middle">Ticket catalog</text>
+  <text class="preview-description" x="150" y="673" text-anchor="middle">Available and unavailable fare products</text>
+
+  <text class="preview-title" x="496" y="650" text-anchor="middle">NFC-ready ticket</text>
+  <text class="preview-description" x="496" y="673" text-anchor="middle">Expanded ticket ready for validator presentation</text>
+</svg>
