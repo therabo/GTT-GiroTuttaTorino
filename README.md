@@ -33,11 +33,11 @@ The project focuses on accurately reproducing the communication between the mobi
 
 <p align="center">
   &ensp;<strong>Ticket catalog</strong>
-  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
   <strong>NFC-ready ticket</strong>
   <br />
   &ensp;&ensp;&ensp;<sub>Available and unavailable fare products</sub>
-  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
   <sub>Expanded ticket ready for validator presentation</sub>
 </p>
 
