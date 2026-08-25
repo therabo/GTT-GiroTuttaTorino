@@ -17,7 +17,7 @@ The project focuses on accurately reproducing the communication between the mobi
 
 ## Application preview
 
-<table>
+<table align="center" width="100%">
   <tr>
     <td align="center" width="50%">
       <img
