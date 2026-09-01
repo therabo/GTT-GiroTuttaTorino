@@ -9,7 +9,7 @@ import it.girotuttatorino.gtt.nfc.core.HceProtocol
 import it.girotuttatorino.gtt.nfc.hce.TicketHostApduService
 import java.util.Locale
 
-/** Dynamically exposes the GTT AID only while the ticket UI gate is open. */
+/** Verifies the static HCE route and gives it priority while the ticket UI is foreground. */
 internal class NfcAidRouter(context: Context) {
     private val applicationContext = context.applicationContext
     private val foregroundActivity = context as? Activity
@@ -17,17 +17,18 @@ internal class NfcAidRouter(context: Context) {
         ComponentName(applicationContext, TicketHostApduService::class.java)
     }
 
-    fun exposeGtt(): Boolean = runCatching {
+    /** Clears AID groups persisted by dynamic-routing builds, then verifies the manifest route. */
+    fun restoreStaticRoute(): Boolean = runCatching {
         val emulation = cardEmulation()
+        emulation.removeAidsForService(serviceComponent, CardEmulation.CATEGORY_OTHER)
         val requiredAids = setOf(HceProtocol.PRIVATE_AID_HEX, HceProtocol.GTT_AID_HEX)
-        val alreadyRegistered = currentAids(emulation).containsAll(requiredAids)
-        val registered = alreadyRegistered || emulation.registerAidsForService(
-            serviceComponent,
-            CardEmulation.CATEGORY_OTHER,
-            requiredAids.toList(),
-        )
-        val routed = registered && currentAids(emulation).containsAll(requiredAids)
+        currentAids(emulation).containsAll(requiredAids)
+    }.getOrDefault(false)
+
+    fun prepareGtt(): Boolean = runCatching {
+        val routed = restoreStaticRoute()
         if (routed) {
+            val emulation = cardEmulation()
             runCatching {
                 foregroundActivity?.let { activity ->
                     emulation.setPreferredService(activity, serviceComponent)
@@ -37,21 +38,12 @@ internal class NfcAidRouter(context: Context) {
         routed
     }.getOrDefault(false)
 
-    fun hideGtt(): Boolean = runCatching {
+    fun releasePreference(): Boolean = runCatching {
         val emulation = cardEmulation()
         runCatching {
             foregroundActivity?.let(emulation::unsetPreferredService)
         }
-        val current = currentAids(emulation)
-        if (current.contains(HceProtocol.GTT_AID_HEX)) {
-            emulation.removeAidsForService(serviceComponent, CardEmulation.CATEGORY_OTHER)
-            emulation.registerAidsForService(
-                serviceComponent,
-                CardEmulation.CATEGORY_OTHER,
-                listOf(HceProtocol.PRIVATE_AID_HEX),
-            )
-        }
-        !currentAids(emulation).contains(HceProtocol.GTT_AID_HEX)
+        true
     }.getOrDefault(false)
 
     private fun cardEmulation(): CardEmulation {

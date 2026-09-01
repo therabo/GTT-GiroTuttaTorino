@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Locale
 
 plugins {
     id("com.android.application")
@@ -10,6 +11,11 @@ val releaseStoreFile = providers.environmentVariable("GTT_RELEASE_STORE_FILE").o
 val releaseStorePassword = providers.environmentVariable("GTT_RELEASE_STORE_PASSWORD").orNull
 val releaseKeyAlias = providers.environmentVariable("GTT_RELEASE_KEY_ALIAS").orNull
 val releaseKeyPassword = providers.environmentVariable("GTT_RELEASE_KEY_PASSWORD").orNull
+val gttHceAid = providers.gradleProperty("gtt.hce.aid").get().trim().uppercase(Locale.US)
+
+require(gttHceAid.matches(Regex("[0-9A-F]{10,32}"))) {
+    "gtt.hce.aid must contain a 5 to 16 byte hexadecimal NFC application identifier"
+}
 
 android {
     namespace = "it.girotuttatorino.gtt"
@@ -40,6 +46,8 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "GTT_HCE_AID", "\"$gttHceAid\"")
+        resValue("string", "gtt_hce_aid", gttHceAid)
     }
 
     buildTypes {
@@ -60,6 +68,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 

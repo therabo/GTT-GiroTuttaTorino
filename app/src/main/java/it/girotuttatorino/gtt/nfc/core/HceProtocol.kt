@@ -1,10 +1,11 @@
 package it.girotuttatorino.gtt.nfc.core
 
+import it.girotuttatorino.gtt.BuildConfig
 import java.io.ByteArrayOutputStream
 
 internal object HceProtocol {
     const val PRIVATE_AID_HEX = "F04754544150502E4843452E5631"
-    const val GTT_AID_HEX = "A0000000014145502E4E4643412E5654"
+    const val GTT_AID_HEX = BuildConfig.GTT_HCE_AID
     const val PAGE_SIZE = 96
     const val MAX_FRAGMENT_SIZE = 248
 

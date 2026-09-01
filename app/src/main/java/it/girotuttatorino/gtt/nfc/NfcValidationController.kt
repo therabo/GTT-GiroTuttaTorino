@@ -72,6 +72,7 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
     }
 
     init {
+        aidRouter.restoreStaticRoute()
         registerAdapterReceiver()
         mainHandler.post { refreshExposure(forceNotify = true) }
     }
@@ -139,7 +140,7 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
         requestedTicketId = null
         mainHandler.removeCallbacks(renewLease)
         sessionGate.close()
-        aidRouter.hideGtt()
+        aidRouter.releasePreference()
         publish(NfcValidationState.Inactive)
     }
 
@@ -161,33 +162,33 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
         val ticketId = requestedTicketId
         if (ticketId == null) {
             sessionGate.close()
-            aidRouter.hideGtt()
+            aidRouter.releasePreference()
             publish(NfcValidationState.Inactive, forceNotify)
             return
         }
         if (ticket == null || TicketProduct.fromTicket(ticket)?.ticketId != ticketId) {
             sessionGate.close()
-            aidRouter.hideGtt()
+            aidRouter.releasePreference()
             ticketRepository.trace("CONTROLLER_ERROR ticket-unavailable")
             publish(NfcValidationState.Error, forceNotify)
             return
         }
         if (!supportsHostCardEmulation()) {
             sessionGate.close()
-            aidRouter.hideGtt()
+            aidRouter.releasePreference()
             publish(NfcValidationState.Unsupported, forceNotify)
             return
         }
         if (nfcAdapter?.isEnabled != true) {
             sessionGate.close()
-            aidRouter.hideGtt()
+            aidRouter.releasePreference()
             publish(NfcValidationState.Disabled, forceNotify)
             return
         }
 
         runCatching {
             sessionGate.open(ticketId)
-            check(aidRouter.exposeGtt()) { "Unable to register the GTT AID" }
+            check(aidRouter.prepareGtt()) { "Unable to prepare the static GTT AID" }
             mainHandler.postDelayed(renewLease, NfcConfig.SESSION_RENEW_INTERVAL_MILLIS)
             when (AepVToken.state(ticket)) {
                 AepVToken.STATE_ISSUED -> NfcValidationState.Ready
@@ -198,7 +199,7 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
             }
         }.onSuccess { newState -> publish(newState, forceNotify) }.onFailure { error ->
             sessionGate.close()
-            aidRouter.hideGtt()
+            aidRouter.releasePreference()
             ticketRepository.trace("CONTROLLER_ERROR ${error.javaClass.simpleName}")
             publish(NfcValidationState.Error, forceNotify)
         }
