@@ -67,6 +67,10 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
         refreshExposure(forceNotify = true)
     }
 
+    private val closeAfterUiPause = Runnable {
+        onTicketOverlayClosed()
+    }
+
     init {
         registerAdapterReceiver()
         mainHandler.post { refreshExposure(forceNotify = true) }
@@ -115,6 +119,7 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
 
     fun onTicketOverlayOpened(ticketId: String) {
         if (closed) return
+        mainHandler.removeCallbacks(closeAfterUiPause)
         if (availableTicketId() != ticketId) {
             onTicketOverlayClosed()
             return
@@ -123,7 +128,14 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
         refreshExposure()
     }
 
+    fun onTicketOverlayPaused(ticketId: String) {
+        if (closed || requestedTicketId != ticketId) return
+        mainHandler.removeCallbacks(closeAfterUiPause)
+        mainHandler.postDelayed(closeAfterUiPause, NfcConfig.UI_PAUSE_GRACE_MILLIS)
+    }
+
     fun onTicketOverlayClosed() {
+        mainHandler.removeCallbacks(closeAfterUiPause)
         requestedTicketId = null
         mainHandler.removeCallbacks(renewLease)
         sessionGate.close()

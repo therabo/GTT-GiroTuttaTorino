@@ -67,6 +67,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -205,6 +206,7 @@ fun TicketsScreen(modifier: Modifier = Modifier) {
     var expandedTicketId by remember { mutableStateOf<String?>(null) }
     val expandedTicket = MainTickets.firstOrNull { it.id == expandedTicketId }
     val context = LocalContext.current
+    val view = LocalView.current
     val lifecycleOwner = context as? LifecycleOwner
     val nfcController = remember(context) {
         NfcValidationController(context)
@@ -234,6 +236,14 @@ fun TicketsScreen(modifier: Modifier = Modifier) {
     val topBarHeight = 104.dp + statusBarHeight
     val footerHeight = 38.dp + navigationBarHeight
     val expandedTicketVisible = expandedTicket != null
+
+    DisposableEffect(view, expandedTicketVisible) {
+        val previousKeepScreenOn = view.keepScreenOn
+        if (expandedTicketVisible) view.keepScreenOn = true
+        onDispose {
+            if (expandedTicketVisible) view.keepScreenOn = previousKeepScreenOn
+        }
+    }
 
     DisposableEffect(nfcController) {
         val observation = nfcController.observe { state ->
@@ -271,7 +281,9 @@ fun TicketsScreen(modifier: Modifier = Modifier) {
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> ticketId?.let(nfcController::onTicketOverlayOpened)
-                Lifecycle.Event.ON_PAUSE -> nfcController.onTicketOverlayClosed()
+                Lifecycle.Event.ON_PAUSE -> ticketId
+                    ?.let(nfcController::onTicketOverlayPaused)
+                    ?: nfcController.onTicketOverlayClosed()
                 else -> Unit
             }
         }
