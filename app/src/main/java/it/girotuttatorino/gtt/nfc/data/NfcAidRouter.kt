@@ -5,11 +5,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.nfc.NfcAdapter
 import android.nfc.cardemulation.CardEmulation
-import it.girotuttatorino.gtt.nfc.core.HceProtocol
 import it.girotuttatorino.gtt.nfc.hce.TicketHostApduService
 import java.util.Locale
 
-/** Verifies the static HCE route and gives it priority while the ticket UI is foreground. */
+/** Gives the manifest-declared HCE route priority while the ticket UI is foreground. */
 internal class NfcAidRouter(context: Context) {
     private val applicationContext = context.applicationContext
     private val foregroundActivity = context as? Activity
@@ -17,25 +16,13 @@ internal class NfcAidRouter(context: Context) {
         ComponentName(applicationContext, TicketHostApduService::class.java)
     }
 
-    /** Clears AID groups persisted by dynamic-routing builds, then verifies the manifest route. */
-    fun restoreStaticRoute(): Boolean = runCatching {
-        val emulation = cardEmulation()
-        emulation.removeAidsForService(serviceComponent, CardEmulation.CATEGORY_OTHER)
-        val requiredAids = setOf(HceProtocol.PRIVATE_AID_HEX, HceProtocol.GTT_AID_HEX)
-        currentAids(emulation).containsAll(requiredAids)
-    }.getOrDefault(false)
-
     fun prepareGtt(): Boolean = runCatching {
-        val routed = restoreStaticRoute()
-        if (routed) {
-            val emulation = cardEmulation()
-            runCatching {
-                foregroundActivity?.let { activity ->
-                    emulation.setPreferredService(activity, serviceComponent)
-                }
-            }
+        val emulation = cardEmulation()
+        removeLegacyDynamicRoute(emulation)
+        val activity = requireNotNull(foregroundActivity) {
+            "A foreground activity is required to prepare NFC"
         }
-        routed
+        emulation.setPreferredService(activity, serviceComponent)
     }.getOrDefault(false)
 
     fun releasePreference(): Boolean = runCatching {
@@ -52,7 +39,19 @@ internal class NfcAidRouter(context: Context) {
         return CardEmulation.getInstance(adapter)
     }
 
-    private fun currentAids(emulation: CardEmulation): Set<String> =
+    /** Dynamic registrations override the manifest and may survive an application upgrade. */
+    private fun removeLegacyDynamicRoute(emulation: CardEmulation) {
+        if (currentDynamicAids(emulation).isNotEmpty()) {
+            check(
+                emulation.removeAidsForService(
+                    serviceComponent,
+                    CardEmulation.CATEGORY_OTHER,
+                ),
+            ) { "Unable to remove the legacy dynamic AID group" }
+        }
+    }
+
+    private fun currentDynamicAids(emulation: CardEmulation): Set<String> =
         emulation.getAidsForService(serviceComponent, CardEmulation.CATEGORY_OTHER)
             .orEmpty()
             .mapTo(mutableSetOf()) { it.uppercase(Locale.US) }

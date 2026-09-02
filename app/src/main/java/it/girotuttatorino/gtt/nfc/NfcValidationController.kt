@@ -72,7 +72,6 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
     }
 
     init {
-        aidRouter.restoreStaticRoute()
         registerAdapterReceiver()
         mainHandler.post { refreshExposure(forceNotify = true) }
     }
