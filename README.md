@@ -53,6 +53,20 @@ To enable a ticket in the application, its data must first be extracted from the
 >
 > This project does not explain how to extract an electronic ticket from the TO Move application or how to import a valid purchased ticket into this application. The author assumes no responsibility for the use or misuse of the application.
 
+## Exploit identified
+
+> **Security finding — Client-enforced ticket consumption and signed-state rollback**
+
+The identified weakness lies in the trust boundary between the validator and the mobile client. In the observed NFC flow, the validator can make an immediate local decision: it reads the V-Token, verifies its structure and cryptographic integrity, records the validation, increments the signature state, and returns a complete V-Token signed again by the validator. No phone-to-backend HTTP request is required during this exchange, allowing validation to remain operational without a synchronous connection from the mobile device.
+
+The lifecycle of the returned ticket is then entrusted to the TO Move application. The client is expected to replace the original pre-validation state with the newly validated V-Token and, once its validity period has ended, retire that ticket from the device. This creates a security dependency on client-controlled storage: a valid signature proves the authenticity and integrity of a V-Token, but it does not, by itself, prove that the represented state is current or that the ticket has never already been consumed.
+
+If an authentic pre-validation V-Token is preserved and later restored, its original signature remains cryptographically valid. Unless the validator checks an authoritative and sufficiently synchronized record of consumed ticket states, it cannot distinguish that restored snapshot from the legitimate unused state first issued to the customer. The weakness is therefore a **rollback and replay vulnerability**, not a signature forgery: it does not require recovery of a signing key or modification of signed ticket fields. Its impact is the potential repeated reuse of one legitimately issued ticket by reverting the client to an earlier valid state after each validity window.
+
+Ticket consumption should therefore not depend solely on deletion or state replacement performed by an untrusted client. Effective mitigations include an authoritative spent-ticket ledger consulted during validation, rollback-resistant monotonic state bound to the V-Token or Object UID, one-time challenges or nonces, synchronized signature counters, and duplicate-use detection across validators. In deployments where continuous connectivity is unavailable, signed local consumption records and periodically synchronized deny lists can reduce the replay window, although delayed synchronization cannot provide the same immediate guarantee as an online consumption check.
+
+Repeated validation tests showed that a restored, authentic pre-validation state continued to be accepted as valid. This demonstrates that, in the observed flow, no effective central synchronization or authoritative spent-state check invalidates that previously consumed state before a subsequent presentation. A validator therefore evaluates the cryptographic validity of the presented V-Token without receiving an enforceable indication that the same signed state has already been used. While this result does not rule out unrelated telemetry or delayed operational data exchange, it establishes the absence of central, periodic synchronization capable of preventing the demonstrated reuse.
+
 ## Reverse engineering core
 
 The diagram below isolates the NFC exchange between Android Host Card Emulation (HCE) and the validator. While a ticket is open, the phone exposes the GTT application identifier and processes the validator commands through a strict, stateful APDU sequence.
