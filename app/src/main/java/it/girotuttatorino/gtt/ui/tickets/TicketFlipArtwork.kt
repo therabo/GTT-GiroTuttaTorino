@@ -38,7 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-private const val QR_REFRESH_MILLIS = 15_000L
+private const val QR_REFRESH_MILLIS = 30_000L
 private val ArtworkShape = RoundedCornerShape(12.dp)
 
 /** The same artwork footprint exposes a white QR reverse only for a valid ticket. */
