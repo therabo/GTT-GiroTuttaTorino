@@ -10,11 +10,14 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import it.girotuttatorino.gtt.nfc.core.AepVToken
+import it.girotuttatorino.gtt.nfc.core.TicketQrPayload
+import it.girotuttatorino.gtt.nfc.core.TicketValidity
 import it.girotuttatorino.gtt.nfc.core.TicketProduct
-import it.girotuttatorino.gtt.nfc.data.NfcAidRouter
+import it.girotuttatorino.gtt.nfc.hce.NfcAidRouter
 import it.girotuttatorino.gtt.nfc.data.NfcSessionGate
 import it.girotuttatorino.gtt.nfc.data.TicketRepository
 import java.util.concurrent.CopyOnWriteArraySet
+import it.girotuttatorino.gtt.nfc.diagnostics.NfcDiagnostics
 
 internal class NfcValidationController(context: Context) : AutoCloseable {
     private val applicationContext = context.applicationContext
@@ -40,6 +43,8 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
     private val adapterStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == NfcAdapter.ACTION_ADAPTER_STATE_CHANGED) {
+                NfcDiagnostics.mark("ADAPTER_STATE_CHANGED",
+                    "state=${intent.getIntExtra(NfcAdapter.EXTRA_ADAPTER_STATE, -1)}")
                 refreshExposure()
             }
         }
@@ -48,6 +53,7 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
     private val renewLease = object : Runnable {
         override fun run() {
             val ticketId = requestedTicketId ?: return
+            NfcDiagnostics.mark("LEASE_RENEW_TIMER")
             val ticket = ticketRepository.loadTicket()
             if (canExposeTicket() && AepVToken.state(ticket) in setOf(
                     AepVToken.STATE_ISSUED,
@@ -68,10 +74,13 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
     }
 
     private val closeAfterUiPause = Runnable {
+        NfcDiagnostics.mark("PAUSE_GRACE_EXPIRED")
         onTicketOverlayClosed()
     }
 
     init {
+        NfcDiagnostics.initialize(applicationContext)
+        NfcDiagnostics.mark("CONTROLLER_CREATE")
         registerAdapterReceiver()
         mainHandler.post { refreshExposure(forceNotify = true) }
     }
@@ -110,6 +119,19 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
         )
     }
 
+    /** QR data is only available while the selected validated ticket is still valid. */
+    fun validatedQrPayload(ticketId: String): ByteArray? {
+        if (closed) return null
+        val ticket = ticketRepository.loadValidated() ?: return null
+        if (TicketProduct.fromTicket(ticket)?.ticketId != ticketId) return null
+        if (TicketValidity.isExpired(
+                ticketRepository.validatedUntilMillis(),
+                System.currentTimeMillis(),
+            )
+        ) return null
+        return TicketQrPayload.fromValidatedToken(ticket, System.currentTimeMillis() / 1_000L)
+    }
+
     fun resetValidatedTicket(ticketId: String): Boolean {
         if (closed || availableTicketId() != ticketId) return false
         val restored = ticketRepository.resetValidated()
@@ -118,9 +140,11 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
     }
 
     fun onTicketOverlayOpened(ticketId: String) {
+        NfcDiagnostics.mark("OVERLAY_OPEN_REQUEST", "closed=$closed")
         if (closed) return
         mainHandler.removeCallbacks(closeAfterUiPause)
         if (availableTicketId() != ticketId) {
+            NfcDiagnostics.mark("OVERLAY_OPEN_REJECT", "reason=product_unavailable")
             onTicketOverlayClosed()
             return
         }
@@ -129,12 +153,15 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
     }
 
     fun onTicketOverlayPaused(ticketId: String) {
+        NfcDiagnostics.mark("OVERLAY_PAUSE",
+            "closed=$closed matching_product=${requestedTicketId == ticketId} grace_ms=${NfcConfig.UI_PAUSE_GRACE_MILLIS}")
         if (closed || requestedTicketId != ticketId) return
         mainHandler.removeCallbacks(closeAfterUiPause)
         mainHandler.postDelayed(closeAfterUiPause, NfcConfig.UI_PAUSE_GRACE_MILLIS)
     }
 
     fun onTicketOverlayClosed() {
+        NfcDiagnostics.mark("OVERLAY_CLOSE", "was_requested=${requestedTicketId != null}")
         mainHandler.removeCallbacks(closeAfterUiPause)
         requestedTicketId = null
         mainHandler.removeCallbacks(renewLease)
@@ -145,6 +172,7 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
 
     override fun close() {
         if (closed) return
+        NfcDiagnostics.mark("CONTROLLER_DESTROY")
         onTicketOverlayClosed()
         closed = true
         mainHandler.removeCallbacks(expireValidatedTicket)
@@ -154,6 +182,7 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
     }
 
     private fun refreshExposure(forceNotify: Boolean = false) {
+        NfcDiagnostics.mark("EXPOSURE_PREPARE_ENTER", "requested=${requestedTicketId != null}")
         mainHandler.removeCallbacks(renewLease)
         mainHandler.removeCallbacks(expireValidatedTicket)
         val ticket = ticketRepository.loadTicket()
@@ -185,6 +214,8 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
             return
         }
 
+        NfcDiagnostics.mark("ADAPTER_READY", "enabled=true hce_supported=true")
+
         runCatching {
             sessionGate.open(ticketId)
             check(aidRouter.prepareGtt()) { "Unable to prepare the static GTT AID" }
@@ -197,6 +228,7 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
                 else -> NfcValidationState.Error
             }
         }.onSuccess { newState -> publish(newState, forceNotify) }.onFailure { error ->
+            NfcDiagnostics.mark("EXPOSURE_PREPARE_ERROR", "error=${error.javaClass.simpleName}")
             sessionGate.close()
             aidRouter.releasePreference()
             ticketRepository.trace("CONTROLLER_ERROR ${error.javaClass.simpleName}")
@@ -222,6 +254,17 @@ internal class NfcValidationController(context: Context) : AutoCloseable {
     }
 
     private fun publish(newState: NfcValidationState, forceNotify: Boolean = false) {
+        if (NfcDiagnostics.ENABLED) {
+            val name = when (newState) {
+                NfcValidationState.Inactive -> "inactive"
+                NfcValidationState.Unsupported -> "unsupported"
+                NfcValidationState.Disabled -> "disabled"
+                NfcValidationState.Ready -> "ready"
+                is NfcValidationState.Validated -> "validated"
+                NfcValidationState.Error -> "error"
+            }
+            NfcDiagnostics.mark("EXPOSURE_STATE", "state=$name")
+        }
         if (!forceNotify && state == newState) return
         state = newState
         observers.forEach { observer -> observer(newState) }

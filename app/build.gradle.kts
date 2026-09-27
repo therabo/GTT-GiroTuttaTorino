@@ -12,6 +12,8 @@ val releaseStorePassword = providers.environmentVariable("GTT_RELEASE_STORE_PASS
 val releaseKeyAlias = providers.environmentVariable("GTT_RELEASE_KEY_ALIAS").orNull
 val releaseKeyPassword = providers.environmentVariable("GTT_RELEASE_KEY_PASSWORD").orNull
 val gttHceAid = providers.gradleProperty("gtt.hce.aid").get().trim().uppercase(Locale.US)
+val nfcDiagnosticsEnabled = providers.gradleProperty("gtt.nfc.diagnostics")
+    .map(String::toBooleanStrict).getOrElse(false)
 
 require(gttHceAid.matches(Regex("[0-9A-F]{10,32}"))) {
     "gtt.hce.aid must contain a 5 to 16 byte hexadecimal NFC application identifier"
@@ -43,10 +45,11 @@ android {
         applicationId = "it.girotuttatorino.gtt"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GTT_HCE_AID", "\"$gttHceAid\"")
+        buildConfigField("boolean", "NFC_DIAGNOSTICS", nfcDiagnosticsEnabled.toString())
         resValue("string", "gtt_hce_aid", gttHceAid)
     }
 
@@ -59,6 +62,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+        }
+        create("diagnostic") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false
+            matchingFallbacks += "release"
         }
     }
 
@@ -102,6 +111,7 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("com.google.zxing:core:3.5.4")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

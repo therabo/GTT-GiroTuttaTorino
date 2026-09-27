@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Shell-only extraction of diagnostic metadata; never ticket storage. -->
+        <provider
+            android:name=".nfc.diagnostics.DiagnosticLogProvider"
+            android:authorities="${applicationId}.diagnostics"
+            android:exported="true"
+            android:readPermission="android.permission.DUMP"
+            android:writePermission="android.permission.DUMP"
+            android:grantUriPermissions="false" />
+    </application>
+</manifest>

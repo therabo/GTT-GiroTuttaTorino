@@ -5,6 +5,7 @@ import it.girotuttatorino.gtt.nfc.core.CardBackend
 import it.girotuttatorino.gtt.nfc.core.TicketProduct
 import it.girotuttatorino.gtt.nfc.data.NfcSessionGate
 import it.girotuttatorino.gtt.nfc.data.TicketRepository
+import it.girotuttatorino.gtt.nfc.diagnostics.NfcDiagnostics
 
 internal class AndroidCardBackend(context: Context) : CardBackend {
     private val applicationContext = context.applicationContext
@@ -29,6 +30,10 @@ internal class AndroidCardBackend(context: Context) : CardBackend {
     }
 
     override fun trace(event: String) {
+        // Include protocol phase/reject reason, never hash, correlation or payload.
+        if (NfcDiagnostics.ENABLED) {
+            NfcDiagnostics.mark("CORE_EVENT", event.split(' ', limit = 3).take(2).joinToString(" "))
+        }
         ticketRepository.trace(event)
     }
 }

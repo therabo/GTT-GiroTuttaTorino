@@ -14,10 +14,13 @@ import androidx.core.view.WindowCompat
 import it.girotuttatorino.gtt.ui.intro.AppIntroScreen
 import it.girotuttatorino.gtt.ui.tickets.TicketsScreen
 import it.girotuttatorino.gtt.ui.theme.GTTTheme
+import it.girotuttatorino.gtt.nfc.diagnostics.NfcDiagnostics
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        NfcDiagnostics.initialize(applicationContext)
+        NfcDiagnostics.mark("ACTIVITY_CREATE", "restored=${savedInstanceState != null}")
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
@@ -40,5 +43,35 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        NfcDiagnostics.mark("ACTIVITY_START")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        NfcDiagnostics.mark("ACTIVITY_RESUME")
+    }
+
+    override fun onPause() {
+        NfcDiagnostics.mark("ACTIVITY_PAUSE")
+        super.onPause()
+    }
+
+    override fun onStop() {
+        NfcDiagnostics.mark("ACTIVITY_STOP")
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        NfcDiagnostics.mark("ACTIVITY_DESTROY", "changing_config=$isChangingConfigurations")
+        super.onDestroy()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        NfcDiagnostics.mark("WINDOW_FOCUS", "focused=$hasFocus")
     }
 }

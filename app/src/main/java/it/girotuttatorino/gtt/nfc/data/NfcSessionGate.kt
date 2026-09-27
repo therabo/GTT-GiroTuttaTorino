@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.SystemClock
 import it.girotuttatorino.gtt.nfc.NfcConfig
 import java.util.UUID
+import it.girotuttatorino.gtt.nfc.diagnostics.NfcDiagnostics
 
 internal data class NfcSessionLease(
     val ticketId: String?,
@@ -32,20 +33,29 @@ internal class NfcSessionGate(context: Context) {
     )
 
     fun open(ticketId: String) = synchronized(gateLock) {
+        NfcDiagnostics.mark("LEASE_OPEN_ENTER")
         writeLease(ticketId)
+        NfcDiagnostics.mark("LEASE_OPEN_EXIT")
     }
 
     fun renew(ticketId: String): Boolean = synchronized(gateLock) {
-        if (!isOpen(ticketId)) return false
+        if (!isOpen(ticketId)) {
+            NfcDiagnostics.mark("LEASE_RENEW_RESULT", "accepted=false")
+            return false
+        }
         writeLease(ticketId)
+        NfcDiagnostics.mark("LEASE_RENEW_RESULT", "accepted=true")
         return true
     }
 
     @SuppressLint("ApplySharedPref")
     fun close() = synchronized(gateLock) {
+        NfcDiagnostics.mark("LEASE_CLOSE_ENTER")
         // The gate must be closed on disk before a concurrent HCE APDU is accepted.
         cachedLease = null
-        preferences.edit().clear().commit()
+        val committed = preferences.edit().clear().commit()
+        NfcDiagnostics.mark("LEASE_CLOSE_EXIT")
+        committed
     }
 
     fun isOpen(ticketId: String): Boolean = synchronized(gateLock) {
@@ -62,6 +72,8 @@ internal class NfcSessionGate(context: Context) {
             elapsedStart = preferences.getLong(KEY_ELAPSED_START, -1L),
         )
         val valid = storedLease.isValid(ticketId, processInstanceId, wallNow, elapsedNow)
+        if (!valid) NfcDiagnostics.mark("LEASE_REJECT",
+            "stored=${storedLease.ticketId != null} product_match=${storedLease.ticketId == ticketId} process_match=${storedLease.processInstanceId == processInstanceId} wall_remaining_ms=${storedLease.wallDeadline - wallNow} elapsed_age_ms=${elapsedNow - storedLease.elapsedStart}")
 
         if (valid) {
             cachedLease = storedLease

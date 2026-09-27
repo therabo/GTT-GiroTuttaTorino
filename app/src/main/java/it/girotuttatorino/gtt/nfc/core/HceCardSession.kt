@@ -2,8 +2,10 @@ package it.girotuttatorino.gtt.nfc.core
 
 import java.io.ByteArrayOutputStream
 
+/** Protocol state machine; Android configuration is supplied by the HCE adapter. */
 internal class HceCardSession(
     private val backend: CardBackend,
+    private val gttAidHex: String,
 ) {
     private enum class Phase {
         IDLE,
@@ -61,7 +63,7 @@ internal class HceCardSession(
             return fail("SELECT_PARAMS", HceProtocol.SW_PARAMETERS, rollback = false)
         }
         val aid = ByteCodec.toHex(command.data)
-        if (aid != HceProtocol.PRIVATE_AID_HEX && aid != HceProtocol.GTT_AID_HEX) {
+        if (aid != HceProtocol.PRIVATE_AID_HEX && aid != gttAidHex) {
             return fail("SELECT_UNKNOWN", HceProtocol.SW_NOT_FOUND, rollback = false)
         }
         if (!backend.isValidationSessionActive()) {
@@ -77,7 +79,7 @@ internal class HceCardSession(
         selectedAid = aid
         phase = Phase.SELECTED
         backend.trace(
-            "A4 SELECT ${if (aid == HceProtocol.GTT_AID_HEX) "GTT_ARMED" else "PRIVATE"} " +
+            "A4 SELECT ${if (aid == gttAidHex) "GTT_ARMED" else "PRIVATE"} " +
                 "bytes=${requireNotNull(ticket).size} hash=${ByteCodec.shortHash(ticket)}",
         )
         return HceProtocol.fci(aid, uid, ticket.size)

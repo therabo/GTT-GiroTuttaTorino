@@ -7,13 +7,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HceCardSessionTest {
+    private val testGttAidHex = "A0000000000000000000000000000001"
     private val correlation = ByteCodec.fromHex("01020304")
 
     @Test
     fun selectIsRejectedWhenTheTicketOverlayIsNotActive() {
         val backend = FakeCardBackend(active = false)
 
-        val response = HceCardSession(backend).process(HceProtocol.select())
+        val response = HceCardSession(backend, testGttAidHex).process(HceProtocol.select())
 
         assertArrayEquals(HceProtocol.SW_CONDITIONS, response)
         assertArrayEquals(backend.originalTicket, backend.storedTicket)
@@ -22,7 +23,7 @@ class HceCardSessionTest {
     @Test
     fun privateAndGttAidProduceTheExpectedAepvFci() {
         val backend = FakeCardBackend()
-        val privateSession = HceCardSession(backend)
+        val privateSession = HceCardSession(backend, testGttAidHex)
         assertEquals(
             "6F28840E${HceProtocol.PRIVATE_AID_HEX}" +
                 "A516BF0C13C70811223344556677885307010100D01001299000",
@@ -30,11 +31,11 @@ class HceCardSessionTest {
         )
         assertArrayEquals(ByteCodec.fromHex("801203019000"), privateSession.process(HceProtocol.profile()))
 
-        val gttSession = HceCardSession(backend)
+        val gttSession = HceCardSession(backend, testGttAidHex)
         assertEquals(
-            "6F2A8410${HceProtocol.GTT_AID_HEX}" +
+            "6F2A8410${testGttAidHex}" +
                 "A516BF0C13C70811223344556677885307010100D01001299000",
-            ByteCodec.toHex(gttSession.process(HceProtocol.select(HceProtocol.GTT_AID_HEX))),
+            ByteCodec.toHex(gttSession.process(HceProtocol.select(testGttAidHex))),
         )
     }
 
@@ -222,7 +223,7 @@ class HceCardSessionTest {
     }
 
     private fun selectedAndProfiledSession(backend: FakeCardBackend): HceCardSession =
-        HceCardSession(backend).also { session ->
+        HceCardSession(backend, testGttAidHex).also { session ->
             assertTrue(HceProtocol.isSuccessful(session.process(HceProtocol.select())))
             assertTrue(HceProtocol.isSuccessful(session.process(HceProtocol.profile())))
         }

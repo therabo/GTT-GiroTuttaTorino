@@ -40,6 +40,9 @@
     <string name="ticket_rides_remaining_value">Viaggi residui nel titolo: %1$d</string>
     <string name="ticket_metro_access_label">Accesso metro</string>
     <string name="ticket_metro_access_value">%1$d</string>
+    <string name="ticket_qr_flip_back">Mostra il QR del biglietto</string>
+    <string name="ticket_qr_flip_front">Mostra il fronte del biglietto</string>
+    <string name="ticket_qr_description">Codice QR del biglietto validato</string>
     <string name="currently_unavailable">Attualmente non disponibile</string>
     <string name="ticket_multi_daily_7">Multi Daily 7</string>
     <string name="ticket_daily">Daily</string>

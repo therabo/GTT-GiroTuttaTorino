@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -128,6 +129,22 @@ class TicketsScreenTest {
 
         composeRule.onNodeWithText("Accesso metro").assertIsDisplayed()
         composeRule.onNodeWithText("1").assertIsDisplayed()
+    }
+
+    @Test
+    fun validatedTicketSwipesToQrReverseAndBack() {
+        provisionValidatedCity(metroAlreadyUsed = false, rideId = 801)
+        render()
+        composeRule.onNodeWithTag("ticket_card_city")
+            .performTouchInput { longClick() }
+
+        composeRule.onNodeWithTag("ticket_artwork_front")
+            .performTouchInput { swipeLeft() }
+
+        composeRule.onNodeWithTag("ticket_qr_reverse").assertIsDisplayed()
+        composeRule.onNodeWithText("QR non disponibile").assertDoesNotExist()
+        composeRule.onNodeWithTag("ticket_qr_reverse").performClick()
+        composeRule.onNodeWithTag("ticket_artwork_front").assertIsDisplayed()
     }
 
     @Test
