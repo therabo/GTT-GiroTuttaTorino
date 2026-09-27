@@ -43,7 +43,7 @@
     <string name="ticket_qr_flip_back">Mostra il QR del biglietto</string>
     <string name="ticket_qr_flip_front">Mostra il fronte del biglietto</string>
     <string name="ticket_qr_description">Codice QR del biglietto validato</string>
-    <string name="currently_unavailable">Attualmente non disponibile</string>
+    <string name="currently_unavailable">Non disponibile</string>
     <string name="ticket_multi_daily_7">Multi Daily 7</string>
     <string name="ticket_daily">Daily</string>
     <string name="ticket_extraurban_multi_6">Multicorsa extraurbano 6</string>
