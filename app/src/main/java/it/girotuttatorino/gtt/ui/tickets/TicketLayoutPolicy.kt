@@ -6,7 +6,7 @@ internal object TicketLayoutPolicy {
         contentWidthDp < 270f || fontScale >= 1.3f
 
     fun stackExpandedControls(contentWidthDp: Float, fontScale: Float): Boolean =
-        contentWidthDp < 310f || fontScale >= 1.3f
+        contentWidthDp < 240f * fontScale.coerceAtLeast(1f)
 
     fun compactOverlay(widthDp: Float, heightDp: Float, fontScale: Float): Boolean =
         widthDp < 360f || heightDp < 620f || fontScale >= 1.3f

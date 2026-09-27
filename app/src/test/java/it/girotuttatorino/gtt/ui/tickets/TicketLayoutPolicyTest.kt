@@ -15,7 +15,9 @@ class TicketLayoutPolicyTest {
     }
 
     @Test fun expandedControlsAndContentAdaptIndependently() {
-        assertTrue(TicketLayoutPolicy.stackExpandedControls(260f, 1f))
+        assertTrue(TicketLayoutPolicy.stackExpandedControls(220f, 1f))
+        assertFalse(TicketLayoutPolicy.stackExpandedControls(300f, 1f))
+        assertTrue(TicketLayoutPolicy.stackExpandedControls(300f, 1.3f))
         assertFalse(TicketLayoutPolicy.stackExpandedControls(440f, 1f))
         assertTrue(TicketLayoutPolicy.compactOverlay(340f, 700f, 1f))
         assertTrue(TicketLayoutPolicy.compactOverlay(440f, 700f, 1.5f))

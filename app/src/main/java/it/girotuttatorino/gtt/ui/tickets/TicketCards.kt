@@ -49,6 +49,7 @@ import it.girotuttatorino.gtt.ui.theme.GttInk
 import it.girotuttatorino.gtt.ui.theme.GttMagenta
 
 internal val TicketShape = RoundedCornerShape(12.dp)
+internal val TicketControlShape = RoundedCornerShape(8.dp)
 
 internal enum class TicketBadgeState {
     Available,
@@ -343,8 +344,8 @@ private fun TicketStatusBadge(
     }
 
     Surface(
-        modifier = modifier,
-        shape = TicketShape,
+        modifier = modifier.testTag("ticket_status_badge"),
+        shape = TicketControlShape,
         color = badgeContainerColor,
     ) {
         if (uniformExpandedSize) {

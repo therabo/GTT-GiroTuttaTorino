@@ -302,15 +302,15 @@ private fun ResetValidatedTicketButton(
             .border(
                 width = 1.dp,
                 color = GttBlue.copy(alpha = 0.18f),
-                shape = TicketShape,
+                shape = TicketControlShape,
             )
-            .clip(TicketShape)
+            .clip(TicketControlShape)
             .testTag("reset_validated_ticket")
             .clickable(
                 onClickLabel = stringResource(R.string.reset_validated_ticket),
                 onClick = onClick,
             ),
-        shape = TicketShape,
+        shape = TicketControlShape,
         color = GttCyan.copy(alpha = 0.13f),
         contentColor = GttBlue,
     ) {
