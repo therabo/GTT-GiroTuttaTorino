@@ -45,8 +45,8 @@ android {
         applicationId = "it.girotuttatorino.gtt"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.1.1"
+        versionCode = 4
+        versionName = "1.1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GTT_HCE_AID", "\"$gttHceAid\"")
         buildConfigField("boolean", "NFC_DIAGNOSTICS", nfcDiagnosticsEnabled.toString())

@@ -28,3 +28,4 @@ tools/provision-private-ticket.sh
 # Older APKs retained locally but no longer published in the repository
 releases/GiroTuttaTorino-1.0.0.apk
 releases/GiroTuttaTorino-1.1.0.apk
+releases/GiroTuttaTorino-1.1.1.apk
