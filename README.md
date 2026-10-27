@@ -17,38 +17,29 @@ The project focuses on accurately reproducing the communication between the mobi
 
 ## Application preview
 
-<table align="left">
-  <tr>
-    <td align="center">
-      <img
-        src="docs/images/ticket-catalog.jpg"
-        alt="GTT ticket catalog with a City ticket available"
-        width="300"
-      />
-      <br />
-      <strong>Ticket catalog</strong>
-      <br />
-      <sub>Available and unavailable fare products</sub>
-    </td>
-  </tr>
-</table>
-<table align="left">
-  <tr>
-    <td align="center">
-      <img
-        src="docs/images/nfc-ticket-ready.jpg"
-        alt="City ticket open and ready for NFC presentation"
-        width="297"
-      />
-      <br />
-      <strong>NFC-ready ticket</strong>
-      <br />
-      <sub>Expanded ticket ready for validator presentation</sub>
-    </td>
-  </tr>
-</table>
-
-<br clear="all" />
+<!-- Captions are included in the borderless SVGs so each preview wraps as a unit. -->
+<p align="center">
+  <a href="docs/images/ticket-catalog.jpg"><picture><source
+    media="(max-width: 767px)"
+    srcset="docs/images/ticket-catalog-preview-mobile.svg"
+    width="300"
+  /><img
+    src="docs/images/ticket-catalog-preview.svg"
+    alt="Ticket catalog — Available and unavailable fare products"
+    width="352"
+    align="top"
+  /></picture></a>
+  <a href="docs/images/nfc-ticket-ready.jpg"><picture><source
+    media="(max-width: 767px)"
+    srcset="docs/images/nfc-ticket-ready-preview-mobile.svg"
+    width="297"
+  /><img
+    src="docs/images/nfc-ticket-ready-preview.svg"
+    alt="NFC-ready ticket — Expanded ticket ready for validator presentation"
+    width="349"
+    align="top"
+  /></picture></a>
+</p>
 
 ## How it works
 
